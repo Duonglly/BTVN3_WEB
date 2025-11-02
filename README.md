@@ -56,5 +56,109 @@ có file readme.md có hình ảnh + text: ghi lại nhật ký quá trình làm
 
 -powerShell chạy:wsl --install
 
-## Tạo thư mục dự 
+## Chuẩn bị MariaDB (schema, admin user, sample products)
+## File SQL khởi tạo trong Ubuntu
+## init.sql:
+CREATE DATABASE IF NOT EXISTS ecommerce;
+USE ecommerce;
 
+CREATE TABLE IF NOT EXISTS users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(100) UNIQUE NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  fullname VARCHAR(255),
+  role ENUM('user','admin') DEFAULT 'user',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS products (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  description TEXT,
+  price DECIMAL(10,2) NOT NULL DEFAULT 0,
+  group_name VARCHAR(100),
+  sold_count INT DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS orders (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT,
+  customer_name VARCHAR(255),
+  address TEXT,
+  phone VARCHAR(50),
+  total DECIMAL(10,2),
+  status VARCHAR(50) DEFAULT 'new',
+  cod_code VARCHAR(100),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS order_items (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  order_id INT,
+  product_id INT,
+  qty INT,
+  price DECIMAL(10,2)
+);
+
+CREATE TABLE IF NOT EXISTS sessions (
+  id VARCHAR(128) PRIMARY KEY,
+  user_id INT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+## Tạo tài khoản admin
+
+cần 1 bcrypt hash cho mật khẩu admin123
+
+Cài Node & bcryptjs:
+sudo apt update
+sudo apt install -y nodejs npm
+
+Tạo thư mục làm việc:
+mkdir -p ~/bcrypt-test && cd ~/bcrypt-test
+
+Khởi tạo npm và cài bcryptjs:
+npm init -y
+npm install bcryptjs
+
+Tạo hash bằng 1 dòng lệnh Node:
+node -e 'const b=require("bcryptjs"); b.hash("admin123",10,(e,h)=>{if(e)console.error(e); else console.log(h)});'
+
+Hash cho mật khẩu admin123:$2b$10$xq0f1iinANkYqVyIDSx7N.4O/J.aC26OeM6z1g5VGA8Pqcw9YvmxG
+## Chèn user + products
+<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/95e226ac-ec69-4cb0-9cb9-cbe0f4ecc0ac" />
+
+# Node-RED: cài palette & tạo flow step-by-step
+## Thiết lập MySQL config (global configuration for mysql node)
+Mysql:<img width="734" height="770" alt="image" src="https://github.com/user-
+       attachments/assets/ce02208a-c67e-4e23-a5f3-41d1a67d1973" />
+## Endpoint: POST /api/login
+Mục tiêu: client gửi {username,password} → Node-RED truy users table → compare bcrypt → tạo session id, lưu sessions table, trả Set-Cookie header session=...; HttpOnly.
+
+Nodes to place (left→right):
+
+http in (method POST, url /api/login)
+
+function (name: buildQuery)
+
+mysql (connected to MariaDB config)
+
+bcrypt (compare) — node from node-red-contrib-bcryptjs
+
+function (name: onSuccessOrFail)
+
+http response
+
+1) http in
+
+Drag http in node.
+
+Double click:
+
+Method: POST
+
+URL: /api/login
+
+Name: POST /api/login
+
+Done
