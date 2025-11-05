@@ -162,3 +162,56 @@ URL: /api/login
 Name: POST /api/login
 
 Done
+
+## Thiết lập Cơ sở dữ liệu MariaDB
+
+-
+-Tạo Bảng Dữ liệu:
+
+-- Tạo bảng user
+--Tạo bảng nhóm sản phẩm
+<img width="1123" height="564" alt="image" src="https://github.com/user-attachments/assets/209b440f-2442-4e1d-9419-3a3073f5239e" />
+--Tạo bẩng sản phẩm
+<img width="905" height="552" alt="image" src="https://github.com/user-attachments/assets/3ac66699-58f3-4c81-adc6-a3350e07128e" />
+--Bảng Đơn hàng (orders) & Chi tiết (order_details)
+<img width="1207" height="723" alt="image" src="https://github.com/user-attachments/assets/c75bf817-0a4f-4472-80e1-bfebd0768139" />
+--Thêm dữ liệu
+
+## Xây dựng Backend API (Node-RED)
+-Cấu hình kết nối::
+<img width="712" height="946" alt="image" src="https://github.com/user-attachments/assets/4a14e103-0561-48b1-b714-078cd18770c9" />
+-Triển khai các API Endpoint:
+--Tạo API Lấy danh sách Sản phẩm:
+<img width="1035" height="149" alt="image" src="https://github.com/user-attachments/assets/6df6a2e4-3fa7-44f1-ac73-9c96b28b9b8f" />
+-- Đã hiển thị danh sách sản phẩm:
+<img width="878" height="375" alt="image" src="https://github.com/user-attachments/assets/36cfba0b-7b91-43bf-b149-1a79882f510c" />
+
+--Xây dựng API Đăng nhập An toàn:
+Cài đặt Node Mã hóa Mật khẩu
+Tạo Mật khẩu Mã hóa cho Admin:
+Tạo Flow Hash Mật khẩu->lấy hash->Cập nhật CSDL
+
+<img width="1165" height="364" alt="image" src="https://github.com/user-attachments/assets/1cfb668a-82c9-4333-a802-0e7e0643e1f5" />
+-- Mật khẩu mã hóa: Admin123($2a$10$WPFVHhJelqS/PElZOnzBlORUb.Uvzf/KO2waJNzEyfIN.tiij8Wku
+)
+<img width="675" height="513" alt="image" src="https://github.com/user-attachments/assets/b857dfca-5551-4d40-8e9a-fc6c7de82ab0" />
+
+--Tạo Flow API Đăng nhập:
+vào setting.js thêm lệnh:
+//session: {
+    secret: "mot_chuoi_bi_mat_rat_dai_va_kho_doan", // Thay bằng chuỗi bí mật của riêng bạn
+    // resave: false,
+    // saveUninitialized: true
+//},
+<img width="990" height="142" alt="image" src="https://github.com/user-attachments/assets/2544af8b-3c13-43a7-bb33-27f53faca223" />
+
+đăng nhập
+<img width="1714" height="509" alt="image" src="https://github.com/user-attachments/assets/a644c7e8-c525-4874-bd74-9bc1e376a869" />
+-- Xây dựng API Giỏ hàng và Sản phẩm (Node-RED)
+
+
+
+
+## Xây dựng Frontend
+
+-Kết nối API:
