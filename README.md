@@ -87,7 +87,8 @@ Hash cho mật khẩu admin123:$2b$10$xq0f1iinANkYqVyIDSx7N.4O/J.aC26OeM6z1g5VGA
 ## Tạo file .yml để cài đặt container sau: 
 
    mariadb (3306), phpmyadmin (8080), nodered/node-red (1880), influxdb (8086), grafana/grafana (3000), nginx (80,443)
-   
+   <img width="1622" height="897" alt="image" src="https://github.com/user-attachments/assets/ccf8018e-a92b-4926-b34a-a073e7e40fdc" />
+
 ## Chèn user + products
 
 <img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/95e226ac-ec69-4cb0-9cb9-cbe0f4ecc0ac" />
