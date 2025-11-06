@@ -50,62 +50,15 @@ có file readme.md có hình ảnh + text: ghi lại nhật ký quá trình làm
 
 # Quá trình thực hiện
 
-## Cài đặt môi trường(Docker desktop, Cài WSL + Ubuntu)
+## Cài đặt môi trường linux(Docker desktop, Cài WSL + Ubuntu)
 
 -Docker:https://www.docker.com/products/docker-desktop/
 
 -powerShell chạy:wsl --install
+ -- linux:
+<img width="837" height="367" alt="image" src="https://github.com/user-attachments/assets/62232e39-3564-4808-b9f9-7a4681137965" />
 
-## Chuẩn bị MariaDB (schema, admin user, sample products)
-## File SQL khởi tạo trong Ubuntu
-## init.sql:
-CREATE DATABASE IF NOT EXISTS ecommerce;
-USE ecommerce;
 
-CREATE TABLE IF NOT EXISTS users (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  username VARCHAR(100) UNIQUE NOT NULL,
-  password_hash VARCHAR(255) NOT NULL,
-  fullname VARCHAR(255),
-  role ENUM('user','admin') DEFAULT 'user',
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE IF NOT EXISTS products (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(255) NOT NULL,
-  description TEXT,
-  price DECIMAL(10,2) NOT NULL DEFAULT 0,
-  group_name VARCHAR(100),
-  sold_count INT DEFAULT 0,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE IF NOT EXISTS orders (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  user_id INT,
-  customer_name VARCHAR(255),
-  address TEXT,
-  phone VARCHAR(50),
-  total DECIMAL(10,2),
-  status VARCHAR(50) DEFAULT 'new',
-  cod_code VARCHAR(100),
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE IF NOT EXISTS order_items (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  order_id INT,
-  product_id INT,
-  qty INT,
-  price DECIMAL(10,2)
-);
-
-CREATE TABLE IF NOT EXISTS sessions (
-  id VARCHAR(128) PRIMARY KEY,
-  user_id INT,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
 ## Tạo tài khoản admin
 
 cần 1 bcrypt hash cho mật khẩu admin123
@@ -122,96 +75,155 @@ npm init -y
 npm install bcryptjs
 
 Tạo hash bằng 1 dòng lệnh Node:
+
 node -e 'const b=require("bcryptjs"); b.hash("admin123",10,(e,h)=>{if(e)console.error(e); else console.log(h)});'
 
 Hash cho mật khẩu admin123:$2b$10$xq0f1iinANkYqVyIDSx7N.4O/J.aC26OeM6z1g5VGA8Pqcw9YvmxG
+
+## Tạo cây thư mục
+
+<img width="386" height="239" alt="image" src="https://github.com/user-attachments/assets/9a1fb518-9fc0-4492-9115-e8660c7a8fb7" />
+
+## Tạo file .yml để cài đặt container sau: 
+
+   mariadb (3306), phpmyadmin (8080), nodered/node-red (1880), influxdb (8086), grafana/grafana (3000), nginx (80,443)
+   
 ## Chèn user + products
+
 <img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/95e226ac-ec69-4cb0-9cb9-cbe0f4ecc0ac" />
-
-# Node-RED: cài palette & tạo flow step-by-step
-## Thiết lập MySQL config (global configuration for mysql node)
-Mysql:<img width="734" height="770" alt="image" src="https://github.com/user-
-       attachments/assets/ce02208a-c67e-4e23-a5f3-41d1a67d1973" />
-## Endpoint: POST /api/login
-Mục tiêu: client gửi {username,password} → Node-RED truy users table → compare bcrypt → tạo session id, lưu sessions table, trả Set-Cookie header session=...; HttpOnly.
-
-Nodes to place (left→right):
-
-http in (method POST, url /api/login)
-
-function (name: buildQuery)
-
-mysql (connected to MariaDB config)
-
-bcrypt (compare) — node from node-red-contrib-bcryptjs
-
-function (name: onSuccessOrFail)
-
-http response
-
-1) http in
-
-Drag http in node.
-
-Double click:
-
-Method: POST
-
-URL: /api/login
-
-Name: POST /api/login
-
-Done
 
 ## Thiết lập Cơ sở dữ liệu MariaDB
 
--
+
 -Tạo Bảng Dữ liệu:
 
--- Tạo bảng user
---Tạo bảng nhóm sản phẩm
-<img width="1123" height="564" alt="image" src="https://github.com/user-attachments/assets/209b440f-2442-4e1d-9419-3a3073f5239e" />
+-- Tạo bảng user:
+
+<img width="1748" height="604" alt="image" src="https://github.com/user-attachments/assets/1913bfb2-6f7e-4276-a444-1b0be073d33c" />
+
+--Tạo bảng nhóm sản phẩm:
+
+<img width="1395" height="577" alt="image" src="https://github.com/user-attachments/assets/ff634151-602e-432b-828d-2ddb5cc4b8a4" />
+
 --Tạo bẩng sản phẩm
-<img width="905" height="552" alt="image" src="https://github.com/user-attachments/assets/3ac66699-58f3-4c81-adc6-a3350e07128e" />
---Bảng Đơn hàng (orders) & Chi tiết (order_details)
-<img width="1207" height="723" alt="image" src="https://github.com/user-attachments/assets/c75bf817-0a4f-4472-80e1-bfebd0768139" />
---Thêm dữ liệu
+
+<img width="1899" height="403" alt="image" src="https://github.com/user-attachments/assets/712f2f78-1c13-4045-a35b-f37c689b921f" />
+
+--Bảng Đơn hàng (orders)  Chi tiết (order_details)
+
+<img width="1919" height="462" alt="image" src="https://github.com/user-attachments/assets/146264b3-deea-4f77-b316-bda93a7eb149" />
+
+--Chi tiết (order_details):
+
+<img width="1194" height="391" alt="image" src="https://github.com/user-attachments/assets/048deeb9-0549-41ee-8899-23eac3c37e86" />
 
 ## Xây dựng Backend API (Node-RED)
--Cấu hình kết nối::
+
+-Cấu hình kết nối:
+
 <img width="712" height="946" alt="image" src="https://github.com/user-attachments/assets/4a14e103-0561-48b1-b714-078cd18770c9" />
+
 -Triển khai các API Endpoint:
+
 --Tạo API Lấy danh sách Sản phẩm:
+
 <img width="1035" height="149" alt="image" src="https://github.com/user-attachments/assets/6df6a2e4-3fa7-44f1-ac73-9c96b28b9b8f" />
+
 -- Đã hiển thị danh sách sản phẩm:
+
 <img width="878" height="375" alt="image" src="https://github.com/user-attachments/assets/36cfba0b-7b91-43bf-b149-1a79882f510c" />
 
 --Xây dựng API Đăng nhập An toàn:
+
 Cài đặt Node Mã hóa Mật khẩu
-Tạo Mật khẩu Mã hóa cho Admin:
+
+Tạo Mật khẩu Mã hóa cho Admin
+
 Tạo Flow Hash Mật khẩu->lấy hash->Cập nhật CSDL
 
 <img width="1165" height="364" alt="image" src="https://github.com/user-attachments/assets/1cfb668a-82c9-4333-a802-0e7e0643e1f5" />
+
 -- Mật khẩu mã hóa: Admin123($2a$10$WPFVHhJelqS/PElZOnzBlORUb.Uvzf/KO2waJNzEyfIN.tiij8Wku
 )
 <img width="675" height="513" alt="image" src="https://github.com/user-attachments/assets/b857dfca-5551-4d40-8e9a-fc6c7de82ab0" />
 
 --Tạo Flow API Đăng nhập:
+
 vào setting.js thêm lệnh:
+
 //session: {
     secret: "mot_chuoi_bi_mat_rat_dai_va_kho_doan", // Thay bằng chuỗi bí mật của riêng bạn
     // resave: false,
     // saveUninitialized: true
 //},
+
 <img width="990" height="142" alt="image" src="https://github.com/user-attachments/assets/2544af8b-3c13-43a7-bb33-27f53faca223" />
 
-đăng nhập
-<img width="1714" height="509" alt="image" src="https://github.com/user-attachments/assets/a644c7e8-c525-4874-bd74-9bc1e376a869" />
+--Xây dựng API đăng kí và đăng nhập:
+
+<img width="1502" height="447" alt="image" src="https://github.com/user-attachments/assets/60a3d657-c97f-4a69-8222-1cb9627b5662" />
+
+--Xây dựng API Lấy Danh mục/Nhóm Sản phẩm
+
 -- Xây dựng API Giỏ hàng và Sản phẩm (Node-RED)
 
+<img width="1016" height="147" alt="image" src="https://github.com/user-attachments/assets/ba10efaa-cc49-478a-9f56-afa303d1f8a5" />
+
+--Xây dựng API Lấy Sản phẩm
+
+<img width="1047" height="100" alt="image" src="https://github.com/user-attachments/assets/2a711559-0ba5-4f53-9f28-3eef3db127c0" />
+
+--Xây dựng API Đặt hàng
+
+<img width="1683" height="152" alt="image" src="https://github.com/user-attachments/assets/732c0387-5bda-477c-b7d1-bf5540671cb5" />
+
+--Tổng thể API
+
+<img width="1644" height="587" alt="image" src="https://github.com/user-attachments/assets/aea05222-dd8d-4b7c-878f-98f7a4953152" />
 
 
+## Sửa file host để Cấu hình Tên miền Giả định
+
+<img width="835" height="864" alt="image" src="https://github.com/user-attachments/assets/81c99ae5-1008-44ea-8663-6fd8fa1ac814" />
 
 ## Xây dựng Frontend
 
 -Kết nối API:
+
+## Kết quả giao diện
+
+## Giao diện đăng ký và đăng nhập
+<img width="1134" height="682" alt="image" src="https://github.com/user-attachments/assets/2675b0b6-9a16-479b-98b2-63c4dcb934af" 
+ 
+-- Khi đăng kí db sẽ hiển thị ngay tài khoản vừa đăng kí
+
+<img width="1096" height="37" alt="image" src="https://github.com/user-attachments/assets/26e97702-2815-4bef-9de4-b337a66db283" />
+-- Đăng nhập thành công
+
+<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/3fa23216-81d5-4e92-965a-bcdd49f35943" />
+
+## Giao diện chính
+
+<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/79f34778-ee57-429a-be6d-027e2c12a3c9" />
+
+## Chức năng lọc sản phẩm theo nhóm sản phẩm
+
+<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/8b2e9694-18ed-448f-98f0-747e23051cbb" />
+
+## Chức năng tìm kiếm theo tên sản phẩm
+
+<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/18a6755b-94ec-4cd0-b23a-bf7b6d35f901" />
+
+## Chức năng thêm vào giỏ hàng, khi ấn vào giỏ hàng sẽ hiện sản phẩm đã thêm và có thể thêm bớt số lượng sản phẩm
+
+<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/f8e9fed5-7bd1-4f07-9fd0-9fb4a38585c0" />
+
+<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/d55dd957-0685-41c1-a51d-f76173dbf1f7" />
+
+## Chức năng đặt hàng, điền thông tin nhận hàng và nhấn xác nhận đặt hàng
+
+<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/6379baef-ad78-4290-8036-fbea8f18c062" />
+
+## Sau khi nhấn nút xác nhận đặt hàng hệ thống sẽ hiển thị thông báo đặt hàng thành công
+
+<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/823a754b-8b95-4a70-810b-ae92c89504db" />
