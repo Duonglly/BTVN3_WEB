@@ -194,7 +194,7 @@ vào setting.js thêm lệnh:
 ## Kết quả giao diện
 
 ## Giao diện đăng ký và đăng nhập
-<img width="1134" height="682" alt="image" src="https://github.com/user-attachments/assets/2675b0b6-9a16-479b-98b2-63c4dcb934af" 
+<img width="1134" height="682" alt="image" src="https://github.com/user-attachments/assets/2675b0b6-9a16-479b-98b2-63c4dcb934af" />
  
 -- Khi đăng kí db sẽ hiển thị ngay tài khoản vừa đăng kí
 
