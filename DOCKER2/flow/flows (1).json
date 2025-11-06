@@ -1,0 +1,233 @@
+[
+    {
+        "id": "ceac65f204587c35",
+        "type": "tab",
+        "label": "User Auth (INSECURE)",
+        "disabled": false,
+        "info": "Flow đăng ký/đăng nhập KHÔNG AN TOÀN (plaintext pass)"
+    },
+    {
+        "id": "3817f58afa835b8a",
+        "type": "http in",
+        "z": "ceac65f204587c35",
+        "name": "POST /register-insecure",
+        "url": "/register-insecure",
+        "method": "post",
+        "upload": false,
+        "skipBodyParsing": false,
+        "swaggerDoc": "",
+        "x": 200,
+        "y": 140,
+        "wires": [
+            [
+                "3ae8dc9156f366c6"
+            ]
+        ]
+    },
+    {
+        "id": "3ae8dc9156f366c6",
+        "type": "function",
+        "z": "ceac65f204587c35",
+        "name": "Validate & Prepare SQL",
+        "func": "const { email, password, full_name } = msg.payload;\n\nif (!email || !password || !full_name) {\n    msg.statusCode = 400;\n    msg.payload = { \n        success: false, \n        message: \"Email, password, và full_name là bắt buộc.\"\n    };\n    return [null, msg]; // Gửi tới output 2 (Lỗi)\n}\n\n// LƯU MẬT KHẨU THƯỜNG (KHÔNG AN TOÀN)\nmsg.topic = \"INSERT INTO users (email, password, full_name, role) VALUES (?, ?, ?, 'customer')\";\nmsg.payload = [\n    email, \n    password, // Mật khẩu plaintext\n    full_name\n];\n\nreturn [msg, null]; // Gửi tới output 1 (OK)",
+        "outputs": 2,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 450,
+        "y": 140,
+        "wires": [
+            [
+                "9ca79194ccb50851"
+            ],
+            [
+                "90d7f47a79b08ad6"
+            ]
+        ]
+    },
+    {
+        "id": "90d7f47a79b08ad6",
+        "type": "http response",
+        "z": "ceac65f204587c35",
+        "name": "HTTP Response (Error)",
+        "statusCode": "",
+        "headers": {},
+        "x": 690,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "8150879291d7bce8",
+        "type": "function",
+        "z": "ceac65f204587c35",
+        "name": "Response 201 (Created)",
+        "func": "msg.statusCode = 201;\nmsg.payload = { \n    success: true, \n    message: \"Đăng ký (không an toàn) thành công!\"\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 890,
+        "y": 140,
+        "wires": [
+            [
+                "90d7f47a79b08ad6"
+            ]
+        ]
+    },
+    {
+        "id": "83bbc597dce8389f",
+        "type": "http in",
+        "z": "ceac65f204587c35",
+        "name": "POST /login-insecure",
+        "url": "/login-insecure",
+        "method": "post",
+        "upload": false,
+        "skipBodyParsing": false,
+        "swaggerDoc": "",
+        "x": 190,
+        "y": 360,
+        "wires": [
+            [
+                "10ed519ff157d8c9"
+            ]
+        ]
+    },
+    {
+        "id": "10ed519ff157d8c9",
+        "type": "function",
+        "z": "ceac65f204587c35",
+        "name": "Prepare SQL Select",
+        "func": "// ... (Logic kiểm tra người dùng và so sánh mật khẩu) ...\n\nif (isPasswordMatch) {\n    const user = msg.payload[0];\n    \n    // Gán dữ liệu người dùng cần thiết (bao gồm role) cho Node JWT Sign sử dụng\n    msg.payload = {\n        userId: user.user_id,\n        email: user.email,\n        name: user.full_name,\n        role: user.role // Gán vai trò vào payload JWT\n    };\n    \n    return [msg, null]; // Gửi tới output 1 (Thành công -> JWT Sign)\n} else {\n    // ... (logic thất bại) ...\n}",
+        "outputs": 2,
+        "timeout": "",
+        "noerr": 1,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 430,
+        "y": 360,
+        "wires": [
+            [
+                "dab61a2fd7dffd5f"
+            ],
+            [
+                "90d7f47a79b08ad6"
+            ]
+        ]
+    },
+    {
+        "id": "0f2b07219eedd89f",
+        "type": "function",
+        "z": "ceac65f204587c35",
+        "name": "Check User & Compare Pass",
+        "func": "// Kiểm tra xem có user không\nif (!msg.payload || msg.payload.length === 0) {\n    msg.statusCode = 401;\n    msg.payload = { success: false, message: \"Email hoặc mật khẩu không đúng.\" };\n    return [null, msg]; // Output 2 (Lỗi)\n}\n\nconst user = msg.payload[0];\n\n// SO SÁNH MẬT KHẨU THƯỜNG (KHÔNG AN TOÀN)\nif (user.password === msg.plainPassword) {\n    // ĐÚNG MẬT KHẨU\n    // Chuẩn bị payload cho JWT\n    msg.payload = {\n        user_id: user.user_id,\n        email: user.email,\n        full_name: user.full_name,\n        role: user.role\n    };\n    // Cấu hình JWT\n    msg.secret = \"YOUR_REALLY_STRONG_SECRET_KEY_GOES_HERE\";\n    msg.expiresIn = \"7d\";\n    return [msg, null]; // Output 1 (OK)\n} else {\n    // SAI MẬT KHẨU\n    msg.statusCode = 401;\n    msg.payload = { success: false, message: \"Email hoặc mật khẩu không đúng.\" };\n    return [null, msg]; // Output 2 (Lỗi)\n}\n",
+        "outputs": 2,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 900,
+        "y": 360,
+        "wires": [
+            [
+                "fbd835f79317aea8"
+            ],
+            [
+                "90d7f47a79b08ad6"
+            ]
+        ]
+    },
+    {
+        "id": "6699673923e4b900",
+        "type": "function",
+        "z": "ceac65f204587c35",
+        "name": "Response 200 (Login OK)",
+        "func": "// Node JWT Sign đã tạo Token và lưu vào msg.payload\nconst token = msg.payload;\nconst userDetails = msg.userDetails; // Giả định bạn lưu thông tin user ở bước trước\n\n// Chuẩn bị phản hồi thành công\nmsg.payload = {\n    success: true,\n    message: \"Đăng nhập thành công!\",\n    token: token, // Gửi Token về Frontend\n    user: {\n        id: userDetails.user_id,\n        name: userDetails.full_name,\n        role: userDetails.role // Gửi vai trò về để Frontend hiển thị giao diện Admin\n    }\n};\n// Chuẩn bị HTTP Response\nmsg.statusCode = 200;\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1340,
+        "y": 360,
+        "wires": [
+            [
+                "90d7f47a79b08ad6"
+            ]
+        ]
+    },
+    {
+        "id": "9ca79194ccb50851",
+        "type": "mysql",
+        "z": "ceac65f204587c35",
+        "mydb": "1c7f97ed10a28e29",
+        "name": "database",
+        "x": 640,
+        "y": 140,
+        "wires": [
+            [
+                "8150879291d7bce8"
+            ]
+        ]
+    },
+    {
+        "id": "dab61a2fd7dffd5f",
+        "type": "mysql",
+        "z": "ceac65f204587c35",
+        "mydb": "1c7f97ed10a28e29",
+        "name": "Get User (MariaDB)",
+        "x": 650,
+        "y": 360,
+        "wires": [
+            [
+                "0f2b07219eedd89f"
+            ]
+        ]
+    },
+    {
+        "id": "fbd835f79317aea8",
+        "type": "jwt sign",
+        "z": "ceac65f204587c35",
+        "name": "",
+        "alg": "HS256",
+        "exp": 3600,
+        "jwkurl": "",
+        "jwkkid": "",
+        "secret": "123",
+        "key": "",
+        "signvar": "payload",
+        "storetoken": "payload",
+        "x": 1120,
+        "y": 420,
+        "wires": [
+            [
+                "6699673923e4b900"
+            ]
+        ]
+    },
+    {
+        "id": "1c7f97ed10a28e29",
+        "type": "MySQLdatabase",
+        "name": "",
+        "host": "mariadb",
+        "port": "3306",
+        "db": "database",
+        "tz": "",
+        "charset": "UTF8"
+    },
+    {
+        "id": "d4db5f241193fe34",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "node-red-node-mysql": "2.0.0",
+            "node-red-contrib-jwt": "0.1.0"
+        }
+    }
+]

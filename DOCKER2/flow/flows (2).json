@@ -1,0 +1,306 @@
+[
+    {
+        "id": "23dfdb2e64bcfe33",
+        "type": "tab",
+        "label": "E-commerce API",
+        "disabled": false,
+        "info": "API cho sản phẩm, danh mục, và đặt hàng"
+    },
+    {
+        "id": "eb08b763032fedac",
+        "type": "http in",
+        "z": "23dfdb2e64bcfe33",
+        "name": "GET /api/categories",
+        "url": "/api/categories",
+        "method": "get",
+        "upload": false,
+        "skipBodyParsing": false,
+        "swaggerDoc": "",
+        "x": 180,
+        "y": 140,
+        "wires": [
+            [
+                "15d13a2ddfeac23c"
+            ]
+        ]
+    },
+    {
+        "id": "15d13a2ddfeac23c",
+        "type": "function",
+        "z": "23dfdb2e64bcfe33",
+        "name": "SELECT * FROM categories",
+        "func": "msg.topic = \"SELECT * FROM categories ORDER BY name\";\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 440,
+        "y": 140,
+        "wires": [
+            [
+                "4652f5b7bc94d98a"
+            ]
+        ]
+    },
+    {
+        "id": "4652f5b7bc94d98a",
+        "type": "mysql",
+        "z": "23dfdb2e64bcfe33",
+        "mydb": "1c7f97ed10a28e29",
+        "name": "MariaDB",
+        "x": 640,
+        "y": 140,
+        "wires": [
+            [
+                "7975bcc9f5a79afe"
+            ]
+        ]
+    },
+    {
+        "id": "7975bcc9f5a79afe",
+        "type": "http response",
+        "z": "23dfdb2e64bcfe33",
+        "name": "HTTP Response",
+        "statusCode": "200",
+        "headers": {},
+        "x": 830,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "8b3920b36ac94519",
+        "type": "http in",
+        "z": "23dfdb2e64bcfe33",
+        "name": "GET /api/products",
+        "url": "/api/products",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 170,
+        "y": 240,
+        "wires": [
+            [
+                "7d85ed66dee11525"
+            ]
+        ]
+    },
+    {
+        "id": "7d85ed66dee11525",
+        "type": "function",
+        "z": "23dfdb2e64bcfe33",
+        "name": "Build SQL Query",
+        "func": "let query = \"SELECT * FROM products\";\nlet whereClauses = [];\nlet params = [];\n\nconst category = msg.req.query.category_id;\nconst search = msg.req.query.search;\n\nif (category && category !== 'all') {\n    whereClauses.push(\"category_id = ?\");\n    params.push(category);\n}\n\nif (search) {\n    whereClauses.push(\"name LIKE ?\");\n    params.push('%' + search + '%');\n}\n\nif (whereClauses.length > 0) {\n    query += \" WHERE \" + whereClauses.join(\" AND \");\n}\n\nmsg.topic = query;\nmsg.payload = params;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 390,
+        "y": 240,
+        "wires": [
+            [
+                "f4824991ef384b73"
+            ]
+        ]
+    },
+    {
+        "id": "f4824991ef384b73",
+        "type": "mysql",
+        "z": "23dfdb2e64bcfe33",
+        "mydb": "1c7f97ed10a28e29",
+        "name": "MariaDB",
+        "x": 600,
+        "y": 240,
+        "wires": [
+            [
+                "7975bcc9f5a79afe"
+            ]
+        ]
+    },
+    {
+        "id": "892e8abdec2b8b9a",
+        "type": "http in",
+        "z": "23dfdb2e64bcfe33",
+        "name": "POST /api/orders",
+        "url": "/api/orders",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 170,
+        "y": 380,
+        "wires": [
+            [
+                "dad77b69806217eb"
+            ]
+        ]
+    },
+    {
+        "id": "ccaf8cf3027edb67",
+        "type": "function",
+        "z": "23dfdb2e64bcfe33",
+        "name": "1. Prepare Order Insert",
+        "func": "// Thay thế toàn bộ code trong node \"1. Prepare Order Insert\"\n\n// Lấy thông tin đặt hàng từ payload gốc (đã lưu ở node trước)\nconst originalPayload = msg.original_payload; \n\nif (!originalPayload || !originalPayload.cart || !originalPayload.shipping) {\n    node.error(\"Dữ liệu đặt hàng gốc bị thiếu sau xác thực JWT.\");\n    msg.statusCode = 400;\n    msg.payload = { success: false, message: \"Dữ liệu giỏ hàng không hợp lệ. Vui lòng thử lại.\" };\n    return [null];\n}\n\nconst { cart, shipping, total_amount } = originalPayload;\n\n// Lấy user_id từ msg.payload (vì \"Store Token\" đã được đổi)\n// msg.payload bây giờ là token đã giải mã, ví dụ: { user_id: 1, email: '...' }\nconst user_id = msg.payload.user_id;\n\n// Lưu lại cart để dùng ở node sau\nflow.set('temp_cart', cart);\n\n// Bước 1: Insert vào 'orders'\nmsg.topic = \"INSERT INTO orders (user_id, total_amount, shipping_name, shipping_phone, shipping_address) VALUES (?, ?, ?, ?, ?)\";\n\n// Đặt payload MỚI cho node mysql\nmsg.payload = [user_id, total_amount, shipping.name, shipping.phone, shipping.address];\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 650,
+        "y": 500,
+        "wires": [
+            [
+                "ae13d568c8c6ca97"
+            ]
+        ]
+    },
+    {
+        "id": "df66b6852a1d60ed",
+        "type": "function",
+        "z": "23dfdb2e64bcfe33",
+        "name": "Response 401 (Unauthorized)",
+        "func": "msg.statusCode = 401;\nmsg.payload = { success: false, message: \"Xác thực thất bại. Vui lòng đăng nhập lại.\" };\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 680,
+        "y": 320,
+        "wires": [
+            [
+                "7975bcc9f5a79afe"
+            ]
+        ]
+    },
+    {
+        "id": "ae13d568c8c6ca97",
+        "type": "mysql",
+        "z": "23dfdb2e64bcfe33",
+        "mydb": "1c7f97ed10a28e29",
+        "name": "2. Insert Order (MariaDB)",
+        "x": 880,
+        "y": 420,
+        "wires": [
+            [
+                "5d5f2b5620b79c5a"
+            ]
+        ]
+    },
+    {
+        "id": "5d5f2b5620b79c5a",
+        "type": "function",
+        "z": "23dfdb2e64bcfe33",
+        "name": "3. Prepare Items Insert",
+        "func": "const order_id = msg.payload.insertId;\nconst cart = flow.get('temp_cart');\n\nif (!cart || cart.length === 0) {\n    msg.topic = \"ROLLBACK;\"; // Hủy đơn hàng nếu giỏ hàng rỗng\n    msg.payload = [];\n    return msg;\n}\n\nlet base_query = \"INSERT INTO order_items (order_id, product_id, quantity, price_at_purchase) VALUES \";\nlet values = [];\nlet params = [];\n\ncart.forEach(item => {\n    values.push(\"(?, ?, ?, ?)\");\n    params.push(order_id, item.product_id, item.quantity, item.price);\n});\n\nmsg.topic = base_query + values.join(\", \");\nmsg.payload = params;\nmsg.order_id = order_id; // Gửi đi để trả về cho client\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1080,
+        "y": 560,
+        "wires": [
+            [
+                "29e644311363f0b0"
+            ]
+        ]
+    },
+    {
+        "id": "29e644311363f0b0",
+        "type": "mysql",
+        "z": "23dfdb2e64bcfe33",
+        "mydb": "1c7f97ed10a28e29",
+        "name": "4. Insert Items (MariaDB)",
+        "x": 1250,
+        "y": 420,
+        "wires": [
+            [
+                "fa20321288e64ab5"
+            ]
+        ]
+    },
+    {
+        "id": "fa20321288e64ab5",
+        "type": "function",
+        "z": "23dfdb2e64bcfe33",
+        "name": "5. Response 201 (Order OK)",
+        "func": "msg.statusCode = 201;\nmsg.payload = { \n    success: true, \n    message: \"Đặt hàng thành công!\",\n    order_id: msg.order_id\n};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1500,
+        "y": 540,
+        "wires": [
+            [
+                "7975bcc9f5a79afe"
+            ]
+        ]
+    },
+    {
+        "id": "59b6ef83baec501a",
+        "type": "jwt verify",
+        "z": "23dfdb2e64bcfe33",
+        "name": "Verify JWT",
+        "alg": [
+            "HS256"
+        ],
+        "jwkurl": "",
+        "secret": "123",
+        "key": "",
+        "signvar": "payload",
+        "storetoken": "payload",
+        "x": 480,
+        "y": 420,
+        "wires": [
+            [
+                "ccaf8cf3027edb67"
+            ]
+        ]
+    },
+    {
+        "id": "dad77b69806217eb",
+        "type": "function",
+        "z": "23dfdb2e64bcfe33",
+        "name": "Extract Bearer Token",
+        "func": "// Đọc Authorization header\nmsg.original_payload = msg.payload; // Lưu payload gốc\nconst authHeader = msg.req.headers.authorization;\n\nif (authHeader && typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {\n   // Lấy chuỗi token, bỏ 'Bearer ' (7 ký tự)\n    msg.payload = authHeader.substring(7);\n    // Lưu lại header cho debug (tùy chọn)\n    msg.original_header = authHeader;\n    return [msg]; // Chuyển token sạch sang output 1\n} else {\n    // Nếu token rỗng hoặc sai định dạng, trả về lỗi 401\n    msg.statusCode = 401;\n    msg.payload = { success: false, message: 'Xác thực thất bại. Vui lòng đăng nhập lại.' };\n    return [null, msg]; // Chuyển lỗi sang output 2\n}",
+        "outputs": 2,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 280,
+        "y": 420,
+        "wires": [
+            [
+                "59b6ef83baec501a"
+            ],
+            [
+                "df66b6852a1d60ed"
+            ]
+        ]
+    },
+    {
+        "id": "1c7f97ed10a28e29",
+        "type": "MySQLdatabase",
+        "name": "",
+        "host": "mariadb",
+        "port": "3306",
+        "db": "database",
+        "tz": "",
+        "charset": "UTF8"
+    },
+    {
+        "id": "ae2e6ee6362ed701",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "node-red-node-mysql": "2.0.0",
+            "node-red-contrib-jwt": "0.1.0"
+        }
+    }
+]

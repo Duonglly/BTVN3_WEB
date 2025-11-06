@@ -1,0 +1,113 @@
+version: "3.8"
+
+services:
+  # 1. Cơ sở dữ liệu MariaDB
+  mariadb:
+    image: mariadb:latest
+    container_name: my-mariadb
+    restart: unless-stopped
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: database
+      MYSQL_USER: my_user
+      MYSQL_PASSWORD: 123456
+    ports:
+      - "3306:3306"
+    volumes:
+      - mariadb-data:/var/lib/mysql
+    networks:
+      - my-app-network
+
+  # 2. Giao diện quản lý CSDL
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: my-phpmyadmin
+    restart: unless-stopped
+    ports: # <-- THÊM LẠI
+      - "8080:80" # <-- THÊM LẠI (Truy cập qua http://localhost:8080)
+    environment:
+      PMA_HOST: mariadb
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: 123456
+    networks:
+      - my-app-network
+    depends_on:
+      - mariadb
+
+  # 3. Node-RED
+  nodered:
+    image: nodered/node-red:latest
+    container_name: my-nodered
+    restart: unless-stopped
+    ports: # <-- THÊM LẠI
+      - "1880:1880" # <-- THÊM LẠI (Truy cập qua http://localhost:1880)
+    volumes:
+      - .nodered-data:/data
+    networks:
+      - my-app-network
+
+  # 4. Cơ sở dữ liệu Time-series InfluxDB
+  influxdb:
+    image: influxdb:latest
+    container_name: my-influxdb
+    restart: unless-stopped
+    ports:
+      - "8086:8086"
+    volumes:
+      - influxdb-data:/var/lib/influxdb2
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: my-admin-user
+      DOCKER_INFLUXDB_INIT_PASSWORD: ${INFLUX_ADMIN_PASSWORD:-my_secret_influx_password}
+      DOCKER_INFLUXDB_INIT_ORG: my-org
+      DOCKER_INFLUXDB_INIT_BUCKET: my-bucket
+    networks:
+      - my-app-network
+
+  # 5. Trực quan hóa Grafana
+  grafana:
+    image: grafana/grafana:latest
+    container_name: my-grafana
+    restart: unless-stopped
+    ports: # <-- THÊM LẠI
+      - "3000:3000" # <-- THÊM LẠI (Truy cập qua http://localhost:3000)
+    volumes:
+      - grafana-data:/var/lib/grafana
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: 123456
+      GF_SERVER_DOMAIN: grafana.local
+    networks:
+      - my-app-network
+    depends_on:
+      - influxdb
+
+  # 6. Web Server/Reverse Proxy Nginx
+  nginx:
+    image: nginx:latest
+    container_name: my-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./html:/usr/share/nginx/html:ro
+      - ./nginx/logs:/var/log/nginx
+      - ./nginx/certs:/etc/nginx/certs:ro
+    networks:
+      - my-app-network
+    depends_on:
+      - nodered
+      - grafana
+      - phpmyadmin
+
+volumes:
+  mariadb-data:
+  #nodered-data:
+  influxdb-data:
+  grafana-data:
+
+networks:
+  my-app-network:
+    driver: bridge

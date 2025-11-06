@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shop Đồ Công nghệ của Ly</title>
+    <style>
+      /* CSS CƠ BẢN & SHOPEE COLOR PALETTE */
+      :root {
+        --primary-color: #ee4d2d; /* Màu cam Shopee */
+        --secondary-color: #6c757d;
+        --success-color: #28a745;
+        --danger-color: #dc3545;
+        --light-bg: #f5f5f5; /* Nền xám nhạt */
+        --card-bg: #ffffff;
+        --text-color: #333;
+        --border-color: #e5e5e5;
+        --transition: all 0.2s ease-in-out;
+      }
+      body {
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        background-color: var(--light-bg);
+        margin: 0;
+        padding: 0;
+        color: var(--text-color);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      .hidden {
+        display: none !important;
+      }
+
+      /* --- AUTH CONTAINER (Giao diện đăng nhập) --- */
+      #auth-container {
+        max-width: 400px;
+        margin: 10vh auto;
+        background: var(--card-bg);
+        padding: 2rem;
+        border-radius: 4px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+      .form h2 {
+        text-align: center;
+        color: var(--primary-color);
+        font-weight: 500;
+        margin-bottom: 1.5rem;
+      }
+      .form-group input {
+        border: 1px solid var(--border-color);
+        border-radius: 2px;
+        width: 100%;
+        padding: 0.75rem;
+      }
+      .form-button {
+        width: 100%;
+        padding: 0.75rem;
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 2px;
+        transition: var(--transition);
+        font-weight: 500;
+        cursor: pointer;
+      }
+      .form-button:hover {
+        opacity: 0.9;
+      }
+      .toggle-link a {
+        color: var(--primary-color);
+        cursor: pointer;
+      }
+      #message-area {
+        border: 1px solid var(--border-color);
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 4px;
+        text-align: center;
+      }
+      #message-area.success {
+        background-color: #e6ffed;
+        color: var(--success-color);
+      }
+      #message-area.error {
+        background-color: #ffeaea;
+        color: var(--danger-color);
+      }
+
+      /* --- HEADER (Rep Shopee) --- */
+      #app-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0;
+      }
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        padding: 1rem 0;
+        background: var(--primary-color);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+        color: white;
+      }
+      .header-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        gap: 30px;
+        padding: 0 20px;
+      }
+      .header-content h1 {
+        margin: 0;
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: white;
+      }
+      .search-bar-container {
+        flex-grow: 1;
+        display: flex;
+        align-items: center;
+      }
+      .search-bar {
+        width: 100%;
+        position: relative;
+      }
+      #search-box-header {
+        width: 100%;
+        padding: 8px 15px;
+        border: none;
+        border-radius: 2px;
+        font-size: 0.9rem;
+        background-color: white;
+      }
+      .search-button {
+        position: absolute;
+        right: 0;
+        top: 0;
+        height: 100%;
+        width: 50px;
+        background-color: #f8f8f8;
+        color: var(--primary-color);
+        border: none;
+        cursor: pointer;
+        border-radius: 0 2px 2px 0;
+        padding: 0;
+      }
+      #cart-icon-button {
+        color: white !important;
+        font-size: 2.2rem;
+        transition: var(--transition);
+        padding: 0 10px;
+        background: none;
+        border: none;
+        cursor: pointer;
+      }
+      #cart-count {
+        background: white;
+        color: var(--primary-color);
+        padding: 2px 5px;
+        border-radius: 50%;
+        font-size: 0.75rem !important;
+        position: relative;
+        top: -15px;
+        left: -10px;
+        font-weight: bold;
+      }
+      #logout-button {
+        background: none;
+        border: 1px solid white;
+        padding: 0.5rem 1rem;
+        color: white;
+        border-radius: 2px;
+        font-size: 0.9rem;
+        transition: var(--transition);
+        cursor: pointer;
+      }
+      #logout-button:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      /* --- PRODUCTS & FILTERS --- */
+      .products-section {
+        padding: 0 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      .filters {
+        display: flex;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        background: var(--card-bg);
+        padding: 1rem;
+        border-radius: 2px;
+        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+      }
+      .filters select {
+        width: 100%;
+        padding: 0.75rem;
+        border-radius: 2px;
+        border: 1px solid var(--border-color);
+        font-size: 0.9rem;
+      }
+
+      /* Product List */
+      #product-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 12px;
+        margin-bottom: 2rem;
+      }
+      .product-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 2px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        transition: box-shadow 0.2s, transform 0.2s;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+      .product-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+      .product-card img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        border-bottom: 1px solid var(--border-color);
+        background-color: #eee;
+      }
+      .product-info {
+        padding: 0.75rem;
+        flex-grow: 1;
+      }
+      .product-info h3 {
+        font-size: 0.9rem;
+        height: 36px;
+        overflow: hidden;
+        margin: 0 0 0.5rem 0;
+      }
+      .product-info p {
+        color: var(--primary-color);
+        font-size: 1.1rem;
+        font-weight: bold;
+      }
+      .product-card button {
+        background-color: var(--primary-color);
+        font-size: 0.9rem;
+        padding: 0.5rem;
+      }
+      .product-card button:hover {
+        background-color: #ff5e3d;
+      }
+
+      /* --- SIDE PANEL (CART) --- */
+      .cart-section {
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 380px;
+        height: 100%;
+        background: var(--card-bg);
+        padding: 20px;
+        box-shadow: -6px 0 15px rgba(0, 0, 0, 0.15);
+        z-index: 1000;
+        transform: translateX(100%);
+        transition: transform 0.3s ease-in-out;
+        display: block !important;
+      }
+      .cart-section.open {
+        transform: translateX(0);
+      }
+      .cart-section h2 {
+        color: var(--primary-color);
+        border-bottom: 2px solid var(--primary-color);
+        padding-bottom: 10px;
+        margin-bottom: 15px;
+        font-weight: 500;
+      }
+      #close-cart-button {
+        color: var(--secondary-color);
+      }
+
+      .cart-items-wrapper {
+        max-height: calc(100vh - 250px);
+        overflow-y: auto;
+      }
+      .cart-item {
+        border-bottom: 1px solid var(--border-color);
+        padding: 0.75rem 0;
+        align-items: flex-start;
+      }
+      .cart-item-name {
+        flex-basis: 40%;
+        font-size: 0.9rem;
+      }
+      .cart-controls {
+        gap: 0.5rem;
+      }
+      .cart-qty-btn {
+        width: 25px;
+        height: 25px;
+        border-radius: 2px;
+        font-weight: bold;
+        font-size: 1rem;
+      }
+      .cart-remove-btn {
+        color: var(--danger-color);
+        font-size: 1rem;
+      }
+      #proceed-to-checkout {
+        background-color: var(--primary-color);
+      }
+      #continue-shopping {
+        background-color: var(--secondary-color);
+      }
+
+      /* --- CHECKOUT VIEW --- */
+      #checkout-view {
+        padding: 0 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      #checkout-view h2 {
+        color: var(--primary-color);
+        font-weight: 500;
+        text-align: center;
+        margin-top: 1rem;
+      }
+      #shipping-form {
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        border: none !important;
+        border-radius: 4px !important;
+      }
+      #checkout-summary h4 {
+        color: var(--primary-color);
+        font-weight: 500;
+      }
+      #place-order-button {
+        background-color: var(--primary-color);
+      }
+      #back-to-cart-button {
+        background-color: var(--secondary-color);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container" id="auth-container">
+      <div id="message-area" class="hidden"></div>
+      <form id="login-form" class="form">
+        <h2>Đăng Nhập</h2>
+        <div class="form-group">
+          <label for="login-email">Email</label>
+          <input type="email" id="login-email" required />
+        </div>
+        <div class="form-group">
+          <label for="login-password">Mật khẩu</label>
+          <input type="password" id="login-password" required />
+        </div>
+        <button type="submit" class="form-button">Đăng Nhập</button>
+        <p class="toggle-link">
+          Chưa có tài khoản? <a id="show-register">Đăng ký ngay</a>
+        </p>
+      </form>
+      <form id="register-form" class="form hidden">
+        <h2>Đăng Ký</h2>
+        <div class="form-group">
+          <label for="register-name">Họ và Tên</label>
+          <input type="text" id="register-name" required />
+        </div>
+        <div class="form-group">
+          <label for="register-email">Email</label>
+          <input type="email" id="register-email" required />
+        </div>
+        <div class="form-group">
+          <label for="register-password">Mật khẩu</label>
+          <input type="password" id="register-password" required />
+        </div>
+        <button type="submit" class="form-button">Đăng Ký</button>
+        <p class="toggle-link">
+          Đã có tài khoản? <a id="show-login">Đăng nhập</a>
+        </p>
+      </form>
+    </div>
+
+    <div id="app-container" class="hidden">
+      <header>
+        <div class="header-content">
+          <h1>LyLy Shop</h1>
+
+          <div class="search-bar-container">
+            <div class="search-bar">
+              <input
+                type="search"
+                id="search-box-header"
+                placeholder="Tìm kiếm sản phẩm trên Shop đồ công nghệ của Ly..."
+                onkeydown="if(event.key === 'Enter') { fetchProducts(); }"
+              />
+              <button
+                type="button"
+                class="search-button"
+                onclick="fetchProducts();"
+              >
+                🔍
+              </button>
+            </div>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 20px">
+            <div id="user-info"></div>
+            <div id="admin-button-container"></div>
+            <button id="cart-icon-button">
+              🛒 <span id="cart-count"> (0)</span>
+            </button>
+            <button id="logout-button">Đăng Xuất</button>
+          </div>
+        </div>
+      </header>
+
+      <div class="main-content-wrapper">
+    <div class="products-section" id="products-view">
+        <div class="filters">
+            <select id="category-filter">
+                <option value="all">Tất cả danh mục</option>
+            </select>
+        </div>
+
+        <div id="product-list"></div>
+    </div>
+
+    <div id="checkout-view" class="hidden">
+        <h2>Thông tin giao hàng và Thanh toán</h2>
+        <div id="checkout-summary"></div>
+
+        <form
+            id="shipping-form"
+            style="max-width: 600px; margin: 2rem auto; padding: 20px"
+        >
+            <div class="form-group">
+                <label for="shipping-name">Họ tên người nhận</label>
+                <input type="text" id="shipping-name" required />
+            </div>
+            <div class="form-group">
+                <label for="shipping-phone">Số điện thoại</label>
+                <input type="tel" id="shipping-phone" required />
+            </div>
+            <div class="form-group">
+                <label for="shipping-address">Địa chỉ</label>
+                <input type="text" id="shipping-address" required />
+            </div>
+            <button type="submit" id="place-order-button" class="form-button">
+                Xác nhận Đặt Hàng
+            </button>
+            <button
+                type="button"
+                id="back-to-cart-button"
+                class="form-button"
+                style="background-color: var(--secondary-color); margin-top: 10px"
+            >
+                Quay lại Giỏ hàng
+            </button>
+        </form>
+    </div>
+    
+    <div id="admin-view" class="hidden">
+        <h2 style="color: var(--primary-color); text-align: center;">🛡️ BẢNG ĐIỀU KHIỂN ADMIN</h2>
+        <div 
+            style="max-width: 800px; margin: 2rem auto; padding: 20px; background: white; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.08);"
+        >
+            <h3>📊 Thống kê nhanh</h3>
+            <div id="order-stats-result">
+                Đang tải thống kê đơn hàng...
+            </div>
+            <h3 style="margin-top: 30px;">📋 Danh sách Đơn hàng</h3>
+            <div id="admin-order-list">
+                 <p style="color: #666;">Danh sách đơn hàng chi tiết sẽ được tải tại đây.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <div id="cart-side-panel" class="cart-section hidden">
+      <button id="close-cart-button" style="float: right; font-size: 1.5rem">
+        &times;
+      </button>
+      <h2>🛒 Giỏ Hàng của bạn</h2>
+      <div class="cart-items-wrapper">
+        <ul id="cart-items-list"></ul>
+      </div>
+
+      <div
+        id="cart-total"
+        style="
+          text-align: right;
+          border-top: 1px solid var(--border-color);
+          padding-top: 10px;
+          margin-top: 10px;
+        "
+      >
+        Tổng tiền: 0 ₫
+      </div>
+
+      <button id="proceed-to-checkout" class="form-button">
+        Tiến hành Đặt hàng
+      </button>
+      <button
+        id="continue-shopping"
+        class="form-button"
+        style="background-color: var(--secondary-color); margin-top: 10px"
+      >
+        Tiếp tục mua sắm
+      </button>
+    </div>
+
+    <script>
+      // JAVASCRIPT LOGIC
+
+      // CẤU HÌNH API & GLOBAL CONST
+      const API_BASE_URL = "http://localhost:1880";
+      const PLACEHOLDER_IMG =
+        "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3Cpath d='M0 0h1v1H0z' fill='%23eee'/%3E%3C/svg%3E";
+
+      // Lấy các phần tử DOM
+      const authContainer = document.getElementById("auth-container");
+      const appContainer = document.getElementById("app-container");
+      const loginForm = document.getElementById("login-form");
+      const registerForm = document.getElementById("register-form");
+      const messageArea = document.getElementById("message-area");
+      const showRegisterLink = document.getElementById("show-register");
+      const showLoginLink = document.getElementById("show-login");
+      const logoutButton = document.getElementById("logout-button");
+      const userInfo = document.getElementById("user-info");
+      const productList = document.getElementById("product-list");
+      const categoryFilter = document.getElementById("category-filter");
+      const searchBox = document.getElementById("search-box-header"); // Search box mới trong header
+      const cartItemsList = document.getElementById("cart-items-list");
+      const cartTotal = document.getElementById("cart-total");
+      const shippingForm = document.getElementById("shipping-form");
+
+      // DOM elements mới
+      const cartSidePanel = document.getElementById("cart-side-panel");
+      const cartIconButton = document.getElementById("cart-icon-button");
+      const cartCount = document.getElementById("cart-count");
+      const closeCartButton = document.getElementById("close-cart-button");
+      const proceedToCheckoutButton = document.getElementById(
+        "proceed-to-checkout"
+      );
+      const continueShoppingButton =
+        document.getElementById("continue-shopping");
+      const backToCartButton = document.getElementById("back-to-cart-button");
+      const productsView = document.getElementById("products-view");
+      const checkoutView = document.getElementById("checkout-view");
+      const checkoutSummary = document.getElementById("checkout-summary");
+      
+      // THÊM: Admin View DOM elements
+      const adminView = document.getElementById("admin-view"); 
+      const adminButtonContainer = document.getElementById("admin-button-container");
+      const adminOrderList = document.getElementById("admin-order-list");
+      const orderStatsResult = document.getElementById("order-stats-result");
+
+      // Trạng thái của ứng dụng
+      let state = {
+        products: [],
+        categories: [],
+        cart: [],
+        token: null,
+        user: null,
+        userRole: 0, // 0: Customer, 1: Admin
+      };
+      
+      // --- HÀM TIỆN ÍCH & VIEW CONTROLLER ---
+
+      function showMessage(message, isError = false) {
+        messageArea.textContent = message;
+        messageArea.className = isError ? "error" : "success";
+      }
+
+      function showAuthPage() {
+        authContainer.classList.remove("hidden");
+        appContainer.classList.add("hidden");
+        // Đảm bảo nút Admin bị xóa khi đăng xuất
+        adminButtonContainer.innerHTML = '';
+        hideCartPanel();
+      }
+
+      async function showAppPage() {
+        authContainer.classList.add("hidden");
+        appContainer.classList.remove("hidden");
+        await loadInitialData();
+        checkUserRoleAndRenderHeader(); // GỌI HÀM KIỂM TRA ROLE VÀ RENDER NÚT
+        showPage('products-view'); // Mặc định hiển thị trang sản phẩm
+      }
+
+      function formatCurrency(amount) {
+        return new Intl.NumberFormat("vi-VN", {
+          style: "currency",
+          currency: "VND",
+        }).format(amount);
+      }
+
+      function getToken() {
+        return state.token || localStorage.getItem("userToken");
+      }
+
+      function parseJwt(token) {
+        try {
+          const base64Url = token.split(".")[1];
+          const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+          const jsonPayload = decodeURIComponent(
+            atob(base64)
+              .split("")
+              .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+              .join("")
+          );
+          return JSON.parse(jsonPayload);
+        } catch (e) {
+          return null;
+        }
+      }
+
+      // Cart Panel View
+      function showCartPanel() {
+        cartSidePanel.classList.remove("hidden");
+        cartSidePanel.classList.add("open");
+        renderCart();
+      }
+
+      function hideCartPanel() {
+        cartSidePanel.classList.remove("open");
+      }
+
+      // Main App Views - Refactored with showPage
+      
+      function showPage(viewId) {
+          // Ẩn tất cả các view chính trong main-content-wrapper
+          document.querySelectorAll('.main-content-wrapper > div').forEach(view => {
+              view.classList.add('hidden');
+          });
+
+          // Hiện view được chọn
+          const targetView = document.getElementById(viewId);
+          if (targetView) {
+              targetView.classList.remove('hidden');
+          }
+          
+          // Đóng cart panel
+          hideCartPanel();
+      }
+
+      function showProductsView() {
+        showPage('products-view');
+      }
+
+      function showCheckoutView() {
+        showPage('checkout-view');
+        renderCheckoutSummary();
+      }
+
+      // CẬP NHẬT: Hàm hiển thị trang Admin
+      function showAdminView() {
+          if (state.userRole === 1) {
+              showPage('admin-view');
+              fetchAdminData(); // GỌI HÀM TẢI DỮ LIỆU ADMIN THỰC TẾ
+          } else {
+              alert("Bạn không có quyền truy cập trang này.");
+              showPage('products-view');
+          }
+      }
+      
+      // THÊM: Hàm kiểm tra vai trò và render nút Admin
+      function checkUserRoleAndRenderHeader() {
+          adminButtonContainer.innerHTML = ''; // Xóa nút cũ
+
+          if (state.userRole === 1) { // Nếu là Admin
+              adminButtonContainer.innerHTML = `
+                  <button 
+                      id="show-admin-view-button" 
+                      style="padding: 0.5rem 1rem; background-color: white; color: var(--primary-color); border: none; border-radius: 2px; font-size: 0.9rem; font-weight: 500; cursor: pointer;"
+                  >
+                      ⚙️ Admin Panel
+                  </button>
+              `;
+              // Gán sự kiện cho nút Admin
+              document.getElementById("show-admin-view-button").addEventListener("click", showAdminView);
+          }
+      }
+
+      function renderCheckoutSummary() {
+        const totalAmount = state.cart.reduce(
+          (total, item) => total + item.price * item.quantity,
+          0
+        );
+        checkoutSummary.innerHTML = `
+                <div style="background: #fff8f8; padding: 10px; border-radius: 4px; margin-bottom: 20px; border: 1px solid #ffcccb;">
+                    <h4>Tóm tắt đơn hàng:</h4>
+                    ${state.cart
+                      .map(
+                        (item) => `
+                        <p style="margin: 5px 0; display: flex; justify-content: space-between; font-size: 0.95rem;">
+                            <span style="color: #666;">${item.name} x${
+                          item.quantity
+                        }</span>
+                            <span style="color: var(--primary-color); font-weight: 500;">${formatCurrency(
+                              item.price * item.quantity
+                            )}</span>
+                        </p>
+                    `
+                      )
+                      .join("")}
+                    <h4 style="border-top: 1px solid var(--border-color); padding-top: 10px; margin-top: 10px; display: flex; justify-content: space-between;">
+                        <span>Tổng cộng (Tạm tính):</span>
+                        <span style="color: var(--primary-color); font-size: 1.3rem;">${formatCurrency(
+                          totalAmount
+                        )}</span>
+                    </h4>
+                </div>
+            `;
+      }
+      
+      // --- CÁC HÀM RENDER CHO ADMIN VIEW (MỚI) ---
+      
+      function renderAdminStats(orders) {
+          const totalOrders = orders.length;
+          const totalRevenue = orders.reduce((sum, order) => sum + order.total_amount, 0);
+
+          orderStatsResult.innerHTML = `
+              <div style="display: flex; justify-content: space-around; gap: 20px; text-align: center;">
+                  <div style="background: #e6f7ff; padding: 15px; border-radius: 4px; flex: 1;">
+                      <h4 style="color: #0056b3; margin: 0 0 5px 0;">Tổng số đơn hàng</h4>
+                      <p style="font-size: 1.8rem; font-weight: bold; color: #0056b3;">${totalOrders}</p>
+                  </div>
+                  <div style="background: #e9ffea; padding: 15px; border-radius: 4px; flex: 1;">
+                      <h4 style="color: var(--success-color); margin: 0 0 5px 0;">Tổng doanh thu</h4>
+                      <p style="font-size: 1.8rem; font-weight: bold; color: var(--success-color);">${formatCurrency(totalRevenue)}</p>
+                  </div>
+              </div>
+          `;
+      }
+
+      function renderAdminOrderList(orders) {
+          if (orders.length === 0) {
+              adminOrderList.innerHTML = '<p style="text-align: center; color: #666;">Chưa có đơn hàng nào.</p>';
+              return;
+          }
+
+          const tableHTML = `
+              <table style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.9rem;">
+                  <thead>
+                      <tr style="background-color: var(--light-bg);">
+                          <th style="padding: 10px; border: 1px solid var(--border-color); text-align: left;">Mã ĐH</th>
+                          <th style="padding: 10px; border: 1px solid var(--border-color); text-align: left;">Tổng tiền</th>
+                          <th style="padding: 10px; border: 1px solid var(--border-color); text-align: left;">Người nhận</th>
+                          <th style="padding: 10px; border: 1px solid var(--border-color); text-align: left;">Ngày đặt</th>
+                          <th style="padding: 10px; border: 1px solid var(--border-color); text-align: left;">Chi tiết</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                      ${orders.map(order => `
+                          <tr>
+                              <td style="padding: 10px; border: 1px solid var(--border-color); font-weight: bold;">#${order.order_id}</td>
+                              <td style="padding: 10px; border: 1px solid var(--border-color); color: var(--primary-color); font-weight: 500;">${formatCurrency(order.total_amount)}</td>
+                              <td style="padding: 10px; border: 1px solid var(--border-color);">${order.shipping_name}</td>
+                              <td style="padding: 10px; border: 1px solid var(--border-color);">${new Date(order.created_at).toLocaleDateString('vi-VN')}</td>
+                              <td style="padding: 10px; border: 1px solid var(--border-color);">
+                                  <button onclick="alert('Địa chỉ: ${order.shipping_address}\\nĐiện thoại: ${order.shipping_phone}\\n\\nSản phẩm:\\n${order.items.map(item => `- ${item.product_name} x${item.quantity} (${formatCurrency(item.item_price)})`).join('\\n')}')"
+                                      style="background: none; border: 1px solid var(--secondary-color); color: var(--secondary-color); padding: 5px 10px; cursor: pointer; border-radius: 2px;">
+                                      Xem
+                                  </button>
+                              </td>
+                          </tr>
+                      `).join('')}
+                  </tbody>
+              </table>
+          `;
+
+          adminOrderList.innerHTML = tableHTML;
+      }
+
+      // --- LOGIC XỬ LÝ CART (Giữ nguyên) ---
+
+      function addToCart(productId) {
+        let existingItem = state.cart.find(
+          (item) => item.product_id === productId
+        );
+
+        if (existingItem) {
+          existingItem.quantity++;
+        } else {
+          const product = state.products.find(
+            (p) => p.product_id === productId
+          );
+          if (product) {
+            state.cart.push({
+              product_id: product.product_id,
+              name: product.name,
+              price: product.price,
+              quantity: 1,
+            });
+          }
+        }
+        renderCart();
+      }
+
+      function updateCartQuantity(productId, action) {
+        const id = parseInt(productId, 10);
+        const itemIndex = state.cart.findIndex(
+          (item) => item.product_id === id
+        );
+
+        if (itemIndex === -1) return;
+
+        if (action === "increase") {
+          state.cart[itemIndex].quantity++;
+        } else if (action === "decrease") {
+          state.cart[itemIndex].quantity--;
+
+          if (state.cart[itemIndex].quantity <= 0) {
+            state.cart.splice(itemIndex, 1);
+          }
+        } else if (action === "remove") {
+          state.cart.splice(itemIndex, 1);
+        }
+
+        renderCart();
+      }
+
+      function renderCart() {
+        cartItemsList.innerHTML = "";
+        let total = 0;
+        let totalItems = 0;
+
+        if (state.cart.length === 0) {
+          cartItemsList.innerHTML =
+            "<li style='padding: 10px;'>Giỏ hàng trống</li>";
+          cartTotal.textContent = "Tổng tiền: 0 ₫";
+          cartCount.textContent = "(0)";
+          return;
+        }
+
+        state.cart.forEach((item) => {
+          const li = document.createElement("li");
+          li.className = "cart-item";
+
+          li.innerHTML = `
+                    <span class="cart-item-name">${item.name}</span>
+                    <div class="cart-controls">
+                        <button class="cart-qty-btn" data-id="${
+                          item.product_id
+                        }" data-action="decrease">-</button>
+                        <span class="cart-item-qty-display">${
+                          item.quantity
+                        }</span>
+                        <button class="cart-qty-btn" data-id="${
+                          item.product_id
+                        }" data-action="increase">+</button>
+                        <button class="cart-remove-btn" data-id="${
+                          item.product_id
+                        }">❌</button>
+                    </div>
+                    <span class="cart-item-price">${formatCurrency(
+                      item.price * item.quantity
+                    )}</span>
+                `;
+          cartItemsList.appendChild(li);
+          total += item.price * item.quantity;
+          totalItems += item.quantity;
+        });
+
+        cartTotal.textContent = `Tổng tiền: ${formatCurrency(total)}`;
+        cartCount.textContent = `(${totalItems})`;
+      }
+
+      // --- XỬ LÝ API (E-COMMERCE) ---
+
+      async function loadInitialData() {
+        await fetchCategories();
+        await fetchProducts();
+      }
+
+      async function fetchCategories() {
+        try {
+          const res = await fetch(`${API_BASE_URL}/api/categories`);
+          state.categories = await res.json();
+          renderCategories();
+        } catch (err) {
+          console.error("Lỗi fetchCategories:", err);
+        }
+      }
+
+      async function fetchProducts() {
+        // Lấy giá trị tìm kiếm từ header search box
+        const category = categoryFilter.value;
+        const search = searchBox.value;
+
+        let query = new URLSearchParams();
+        if (category && category !== "all") {
+          query.append("category_id", category);
+        }
+        if (search) {
+          query.append("search", search);
+        }
+
+        try {
+          const res = await fetch(
+            `${API_BASE_URL}/api/products?${query.toString()}`
+          );
+          state.products = await res.json();
+          renderProducts();
+        } catch (err) {
+          console.error("Lỗi fetchProducts:", err);
+        }
+      }
+
+      // THÊM: HÀM TẢI DỮ LIỆU ADMIN (MỚI)
+      async function fetchAdminData() {
+          orderStatsResult.innerHTML = 'Đang tải thống kê đơn hàng...';
+          adminOrderList.innerHTML = 'Đang tải danh sách đơn hàng...';
+
+          try {
+              const res = await fetch(`${API_BASE_URL}/api/admin/orders`, {
+                  method: "GET",
+                  headers: {
+                      "Authorization": `Bearer ${getToken()}`
+                  }
+              });
+
+              const orders = await res.json();
+
+              if (res.status === 403) {
+                  adminOrderList.innerHTML = '<p style="color: var(--danger-color); text-align: center;">🛡️ Lỗi 403: Bạn không có quyền Admin để truy cập.</p>';
+                  orderStatsResult.innerHTML = '';
+                  return;
+              }
+              
+              if (!res.ok) {
+                   throw new Error(orders.message || "Lỗi không xác định khi tải dữ liệu admin.");
+              }
+
+              // SỬ DỤNG DỮ LIỆU ĐỂ RENDER
+              renderAdminStats(orders);
+              renderAdminOrderList(orders);
+
+          } catch (err) {
+              console.error("Lỗi fetchAdminData:", err);
+              adminOrderList.innerHTML = `<p style="color: var(--danger-color); text-align: center;">Lỗi: ${err.message || 'Lỗi kết nối server hoặc lỗi dữ liệu.'}</p>`;
+              orderStatsResult.innerHTML = '';
+          }
+      }
+
+
+      shippingForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if (state.cart.length === 0) {
+          alert("Giỏ hàng của bạn đang rỗng!");
+          return;
+        }
+
+        const body = {
+          shipping: {
+            name: document.getElementById("shipping-name").value,
+            phone: document.getElementById("shipping-phone").value,
+            address: document.getElementById("shipping-address").value,
+          },
+          cart: state.cart.map((item) => ({
+            product_id: item.product_id,
+            quantity: item.quantity,
+            price: item.price,
+          })),
+          total_amount: state.cart.reduce(
+            (total, item) => total + item.price * item.quantity,
+            0
+          ),
+        };
+
+        try {
+          const res = await fetch(`${API_BASE_URL}/api/orders`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${getToken()}`,
+            },
+            body: JSON.stringify(body),
+          });
+
+          const data = await res.json();
+
+          if (data.success) {
+            alert(
+              `Đặt hàng thành công! Mã đơn hàng: ${data.order_id}. Chúc bạn có trải nghiệm mua sắm vui vẻ!`
+            );
+            state.cart = [];
+            renderCart();
+            shippingForm.reset();
+            showProductsView(); // Quay lại trang sản phẩm
+          } else {
+            alert(`Lỗi: ${data.message}`);
+          }
+        } catch (err) {
+          alert("Lỗi server. Không thể đặt hàng.");
+        }
+      });
+
+      // --- XỬ LÝ RENDER GIAO DIỆN (Giữ nguyên logic) ---
+
+      function renderCategories() {
+        categoryFilter.innerHTML =
+          '<option value="all">Tất cả danh mục</option>';
+        state.categories.forEach((cat) => {
+          const option = document.createElement("option");
+          option.value = cat.category_id;
+          option.textContent = cat.name;
+          categoryFilter.appendChild(option);
+        });
+      }
+
+      function renderProducts() {
+        productList.innerHTML = "";
+        if (state.products.length === 0) {
+          productList.innerHTML =
+            "<p style='padding: 20px; text-align: center; color: #666;'>Không tìm thấy sản phẩm nào.</p>";
+          return;
+        }
+
+        state.products.forEach((product) => {
+          const card = document.createElement("div");
+          card.className = "product-card";
+
+          card.innerHTML = `
+                    <img src="${product.image_url || PLACEHOLDER_IMG}" 
+                         alt="${product.name}" 
+                         onerror="this.onerror=null; this.src='${PLACEHOLDER_IMG}';">
+                    <div class="product-info">
+                        <h3>${product.name}</h3>
+                        <p>${formatCurrency(product.price)}</p>
+                    </div>
+                    <button class="add-to-cart-btn" data-id="${
+                      product.product_id
+                    }">
+                        Thêm vào giỏ
+                    </button>
+                `;
+          productList.appendChild(card);
+        });
+      }
+
+      // --- XỬ LÝ EVENTS (Giữ nguyên logic) ---
+
+      // AUTH EVENTS
+      showRegisterLink.addEventListener("click", () => {
+        loginForm.classList.add("hidden");
+        registerForm.classList.remove("hidden");
+        messageArea.className = "hidden";
+      });
+      showLoginLink.addEventListener("click", () => {
+        loginForm.classList.remove("hidden");
+        registerForm.classList.add("hidden");
+        messageArea.className = "hidden";
+      });
+      logoutButton.addEventListener("click", () => {
+        localStorage.removeItem("userToken");
+        state.token = null;
+        state.user = null;
+        state.userRole = 0; // RESET VAI TRÒ
+        state.cart = [];
+        renderCart();
+        showAuthPage();
+      });
+
+      // PRODUCT/FILTER EVENTS
+      categoryFilter.addEventListener("change", fetchProducts);
+
+      productList.addEventListener("click", (e) => {
+        if (e.target.classList.contains("add-to-cart-btn")) {
+          const productId = parseInt(e.target.dataset.id, 10);
+          addToCart(productId);
+        }
+      });
+
+      // CART CONTROL EVENTS
+      cartIconButton.addEventListener("click", showCartPanel);
+      closeCartButton.addEventListener("click", hideCartPanel);
+      continueShoppingButton.addEventListener("click", hideCartPanel);
+      // backToCartButton.addEventListener("click", showProductsView); // Đã sử dụng showProductsView mới
+      backToCartButton.addEventListener("click", () => showPage('products-view'));
+
+
+      // Bấm "Tiến hành Đặt hàng" (Chuyển sang Form Thanh toán)
+      proceedToCheckoutButton.addEventListener("click", () => {
+        if (state.cart.length === 0) {
+          alert("Giỏ hàng của bạn đang rỗng!");
+          return;
+        }
+        showCheckoutView();
+      });
+
+      // Event Listener cho Giỏ hàng (Bắt sự kiện click vào nút +/-/X)
+      cartItemsList.addEventListener("click", (e) => {
+        const target = e.target;
+        const productId = target.dataset.id;
+
+        if (!productId) return;
+
+        if (target.classList.contains("cart-qty-btn")) {
+          const action = target.dataset.action;
+          updateCartQuantity(productId, action);
+        } else if (target.classList.contains("cart-remove-btn")) {
+          updateCartQuantity(productId, "remove");
+        }
+      });
+
+      // --- KHỞI CHẠY ---
+      // Kiểm tra xem user đã đăng nhập từ trước chưa
+      document.addEventListener("DOMContentLoaded", () => {
+        const token = localStorage.getItem("userToken");
+        if (token) {
+          state.token = token;
+          state.user = parseJwt(token);
+          // THAY ĐỔI: Phân tích vai trò người dùng khi khởi động
+          state.userRole = state.user && state.user.role === 'admin' ? 1 : 0; 
+          userInfo.textContent = `Chào, ${state.user.full_name}`;
+          showAppPage();
+        } else {
+          showAuthPage();
+        }
+      });
+
+      // --- AUTH API HANDLERS (Đã chỉnh sửa logic đăng nhập) ---
+
+      registerForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const body = {
+          full_name: document.getElementById("register-name").value,
+          email: document.getElementById("register-email").value,
+          password: document.getElementById("register-password").value,
+        };
+
+        try {
+          const res = await fetch(`${API_BASE_URL}/register-insecure`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+          });
+          const data = await res.json();
+          if (data.success) {
+            showMessage("Đăng ký thành công! Vui lòng đăng nhập.", false);
+            showLoginLink.click();
+          } else {
+            showMessage(data.message, true);
+          }
+        } catch (err) {
+          showMessage("Lỗi kết nối server.", true);
+        }
+      });
+
+      loginForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const body = {
+          email: document.getElementById("login-email").value,
+          password: document.getElementById("login-password").value,
+        };
+
+        try {
+          const res = await fetch(`${API_BASE_URL}/login-insecure`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+          });
+          const data = await res.json();
+          if (data.success) {
+            state.token = data.token;
+            state.user = parseJwt(data.token);
+            localStorage.setItem("userToken", data.token);
+            // THAY ĐỔI: Phân tích và gán vai trò người dùng
+            state.userRole = state.user && state.user.role === 'admin' ? 1 : 0;
+            
+            userInfo.textContent = `Chào, ${state.user.full_name}`;
+            await showAppPage();
+          } else {
+            showMessage(data.message, true);
+          }
+        } catch (err) {
+          showMessage("Lỗi kết nối server.", true);
+        }
+      });
+    </script>
+  </body>
+</html>
